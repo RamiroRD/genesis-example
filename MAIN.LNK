@@ -1,0 +1,7 @@
+Cart	group  obj $0
+	section	Code,Cart
+
+68kBss	group  obj $ffff0000
+	section	Variables,68kBss
+	
+	include main.cof

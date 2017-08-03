@@ -1,0 +1,8 @@
+*.ls
+*.c
+*.exe
+*.cof
+*.map
+*.lst
+OUTPUT.BIN
+
