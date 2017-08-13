@@ -25,10 +25,11 @@ isFillOver?:
 ;---------------------
 ClearVSRAM:
 		moveq #39,d1
-		move.l	#$40000080,(a0)
-ClearVSRAM?:
+		move.l	#$40000080, VDPControl
+		lea VDPData, a1
+@loop:
 		move.w	#0,(a1)
-		dbf d1,ClearVSRAM?
+		dbf d1, @loop
 		rts
 		
 ;----------------------------------------------

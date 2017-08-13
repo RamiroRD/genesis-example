@@ -21,30 +21,24 @@ SkipSecurity:
 ; Registros VDP
 ;---------------------
 		lea	(VDPSetupArray),a0
+		lea VDPControl, a1
 		move.w	#(VDPSetupArrayEnd-VDPSetupArray)/2-1,d1	
 VDPSetupLoop:
-		move.w	(a0)+,VDPControl
-		dbf	d1,VDPSetupLoop
+		move.w (a0)+, (a1)
+		dbf	d1, VDPSetupLoop
 		
-;---------------------
-; ClearVSRAM
-;---------------------
 		bsr ClearVSRAM
 		
-;---------------------
-; Clear VRAM
-;---------------------		
-
+; Clear VRAM 	
 		; This uses VRAM FILL
-		move.l #$81748F01, VDPControl	; byte increment and DMA enable
-		move.l #$94FF93FF, VDPControl	; 
-		move.l #$8780,VDPControl		; VRAM FILL
-		move.l #$40000080,VDPControl  	; Destination = $0000
-		move.b #$00,VDPData				; Byte to fill with
 		
-;---------------------
-; RAM
-;---------------------	
+		move.l #$81748F01, (a1)	; byte increment and DMA enable
+		move.l #$94FF93FF, (a1)	; 
+		move.l #$8780, (a1)		; VRAM FILL
+		move.l #$40000080, (a1)  	; Destination = $0000
+		move.b #$00, (a1)			; Byte to fill with
+
+; ClearRAM
 
 		lea	($FFFF0000).l,a0
 		move.w	#$3fff,d1
@@ -53,18 +47,14 @@ ClearRAM:
 		move.l	#0,(a0)+
 		dbf	d1,ClearRAM
 		
-		
-;---------------------
-; CRAM
-;---------------------	
-
-WaitDMAFillOver:
+		lea VDPControl, a0
+@waitfordma:
 		move.b (a0),d0
 		btst #1,d0
-		beq WaitDMAFillOver
+		beq @waitfordma
 		move.w #$8F02,(a0)
 
-		move.l	#$C0000000,VDPControl
+		move.l	#$C0000000, (a0)
 		move.w	#63,d1
 		
 ClearCRAM:
