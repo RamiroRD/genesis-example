@@ -62,6 +62,7 @@ Phi      ds.w 1
 		INCLUDE INC/SPRMGR.INC
 		INCLUDE INC/OBJECT.INC
 		INCLUDE INC/OBJ00.INC
+		INCLUDE INC/OBJ01.INC
 		
 Init:
 		move.l #(VRAM_DATA_END-VRAM_DATA)/2,d0
@@ -104,9 +105,12 @@ Init:
 		addq #ElemContents, a0
 		move.w d5, d0
 		add.w d6, d5
-		bsr Obj00Create	
+		bsr Obj00Create
 		dbf d7, @CreateObjects
 		
+		bsr MemoryPoolAlloc
+		addq #ElemContents, a0
+		bsr Obj01Create
 @EnableInterrupts
 		move #$0000,sr ; Switch to user mode and unmask interrupts
 		
