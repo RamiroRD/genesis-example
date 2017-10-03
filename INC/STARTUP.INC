@@ -1,82 +1,73 @@
 
 StartUp:
+		move #$2700,sr 	
 		tst.l	($A10008).l		;Test Port A control
-		bne	PortA_Ok
-PortA_Ok:
-		bne	SkipSetup
-
 		move.b	($A10001).l,d0		;version
 		andi.b	#$F,d0
-		beq	SkipSecurity			
+		beq	@notmss			
 		move.l	#'SEGA',($A14000).l
-
-SkipSecurity:   
-
-		move.w	($C00004).l,d0		;test if VDP works
-		
+@notmss:   
 		move.l #UserStack,a6
 		move a6,usp
+
+		lea VDPControl, a6
+		lea VDPData, a5
+@waitfordma:
+		move.b (a6), d0
+		btst #1, d0
+		beq @waitfordma
 		
-;---------------------
-; Registros VDP
-;---------------------
-		lea	(VDPSetupArray),a0
-		lea VDPControl, a1
-		move.w	#(VDPSetupArrayEnd-VDPSetupArray)/2-1,d1	
-VDPSetupLoop:
-		move.w (a0)+, (a1)
-		dbf	d1, VDPSetupLoop
+SetupVDP:
+; Load VDP regs
+		lea	VDPSetupArray, a0
+		move.w	#(VDPSetupArrayEnd-VDPSetupArray)/4-1,d1	
+@regs:
+		move.l (a0)+, (a6)
+		dbf	d1, @regs
 		
+; Clear VSRAM
 		bsr ClearVSRAM
 		
 ; Clear VRAM 	
-		; This uses VRAM FILL
+		move.l #$8F018174, (a6)	; byte increment and DMA enable
+		move.l #$94FF93FF, (a6)
+		move.l #$40000080, (a6)  	; Destination = $0000
 		
-		move.l #$81748F01, (a1)	; byte increment and DMA enable
-		move.l #$94FF93FF, (a1)	; 
-		move.l #$8780, (a1)		; VRAM FILL
-		move.l #$40000080, (a1)  	; Destination = $0000
-		move.b #$00, (a1)			; Byte to fill with
-
+		move.w #0, $FFFF0000
+		move.b $FFFF0000, (a5)			; Byte to fill with
+		
 ; ClearRAM
 
 		lea	($FFFF0000).l,a0
-		move.w	#$3fff,d1
+		moveq #0, d2
+		move.w #$3fff,d1
+@ram:
+		move.l d2, (a0)+
+		dbf	d1, @ram
 		
-ClearRAM:
-		move.l	#0,(a0)+
-		dbf	d1,ClearRAM
-		
-		lea VDPControl, a0
+; Wait for VRAM fill to finish
 @waitfordma:
-		move.b (a0),d0
-		btst #1,d0
+		move.b (a6), d0
+		btst #1, d0
 		beq @waitfordma
-		move.w #$8F02,(a0)
+		move.l #$8F028164,(a6)
 
-		move.l	#$C0000000, (a0)
+; Clear CRAM
+		move.l	#$C0000000, (a6)
 		move.w	#63,d1
+@cram:
+		move.w	d2, (a5)
+		dbf	d1, @cram
 		
-ClearCRAM:
-		move.w	#0,VDPData
-		dbf	d1,ClearCRAM
-				
-
-;---------------------
-; PSG
-;---------------------	
+; Reset PSG
 
 		move.b	#$9F,($C00011).l
 		move.b	#$BF,($C00011).l
 		move.b	#$DF,($C00011).l
-		move.b	#$FF,($C00011).l
-		
-		
+		move.b	#$FF,($C00011).l		
 		move.w	#0,($A11200).l
 		
-;--------------------
-SkipSetup:
-	bra Init
+		bra Init
 	
 VDPSetupArray:
 		dc.w	$8006	;

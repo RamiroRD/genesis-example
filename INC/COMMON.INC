@@ -9,12 +9,12 @@ ClearScreen:
 		move.l #$94409300, (a0) ; $400 bytes from $C000 up to end of VRAM
 		move.l #$8780,(a0)		; VRAM FILL
 		move.l #$40000083,(a0)  ; Destination = $C000
-		move.b #$00,(a1)
+		move.b #$00, VDPData
 isFillOver?:
 		move.w (a0),d0
 		btst #1,d0
 		bne isFillOver?
-		move.w #$8F02,(a0)
+		move.l #$8F028164,(a0)
 		bra ClearVSRAM ; this will return for us
 
 		

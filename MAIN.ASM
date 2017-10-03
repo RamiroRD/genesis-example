@@ -3,7 +3,7 @@ UserStack EQU $FFFFFFFF
 
 		Section Code
 
-Vectors:dc.l SystemStack,EntryPoint, BusError, AddressError
+Vectors:dc.l SystemStack, StartUp, BusError, AddressError
 		dc.l IllegalInstruction, DivByZero, CHKInstruction,	TrapV
 		dc.l PrivilegeViolation, Trace, Line1010, Line1111
 		dc.l Error,	Error,		Error,	Error
@@ -62,10 +62,7 @@ Phi      ds.w 1
 		INCLUDE INC/SPRMGR.INC
 		INCLUDE INC/OBJECT.INC
 		INCLUDE INC/OBJ00.INC
-
-EntryPoint:
-		move #$2700,sr
-		bra StartUp 		
+		
 Init:
 		move.l #(VRAM_DATA_END-VRAM_DATA)/2,d0
 		moveq #0,d1
@@ -116,8 +113,8 @@ Init:
 ;-----------------------
 ; Loop principal
 ;-----------------------
-Main:
-		bra Main
+@idle:
+		bra @idle
 
 ;---------------------
 ; Horizontal Blank
