@@ -76,6 +76,7 @@ MemoryPoolAlloc:
 	rts
 .full:
 	move.w #NA,d0
+	ext d0
 	move.l d0,a0
 	rts ; return a0
 	
