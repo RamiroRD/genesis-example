@@ -14,9 +14,10 @@ MemoryPoolFirstFree ds.w 1
 MemoryPoolElements ds.b 4096
 	
 ; Element structure offsets
-ElemNext      equ  0
-ElemNextFree  equ  2
-ElemContents  equ  4
+				rsreset
+ElemNext		rs.w  1
+ElemNextFree	rs.w  1
+ElemContents	rs.w  1
 
 	Section Code
 ; All subroutines in this file follow the convention in which d0-d3 and a0-a3 are the only registers
