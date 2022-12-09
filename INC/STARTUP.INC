@@ -13,9 +13,9 @@ StartUp:
 		lea VDPControl, a6
 		lea VDPData, a5
 @waitfordma:
-		move.b (a6), d0
+		move.w (a6), d0
 		btst #1, d0
-		beq @waitfordma
+		bne.s @waitfordma
 		
 SetupVDP:
 ; Load VDP regs
@@ -47,9 +47,9 @@ SetupVDP:
 		
 ; Wait for VRAM fill to finish
 @waitfordma:
-		move.b (a6), d0
+		move.w (a6), d0
 		btst #1, d0
-		beq @waitfordma
+		bne.s @waitfordma
 		move.l #$8F028164,(a6)
 
 ; Clear CRAM
