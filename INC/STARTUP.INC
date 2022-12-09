@@ -16,6 +16,27 @@ StartUp:
 		move.w (a6), d0
 		btst #1, d0
 		bne.s @waitfordma
+
+; ClearRAM
+		lea	($FFFF0000).l,a0
+		moveq #0, d2
+		move.w #$3fff,d1
+@ram:
+		move.l d2, (a0)+
+		dbf	d1, @ram
+
+; Wait for V-blank for to avoid going all black in the middle of rasterization.
+@vblank?:
+		move.w (a6), d0
+		btst #3, d0
+		beq.s @vblank?
+
+; Clear CRAM
+		move.l	#$C0000000, (a6)
+		move.w	#63,d1
+@cram:
+		move.w	d2, (a5)
+		dbf	d1, @cram
 		
 SetupVDP:
 ; Load VDP regs
@@ -36,14 +57,6 @@ SetupVDP:
 		move.w #0, $FFFF0000
 		move.b $FFFF0000, (a5)			; Byte to fill with
 		
-; ClearRAM
-
-		lea	($FFFF0000).l,a0
-		moveq #0, d2
-		move.w #$3fff,d1
-@ram:
-		move.l d2, (a0)+
-		dbf	d1, @ram
 		
 ; Wait for VRAM fill to finish
 @waitfordma:
@@ -52,13 +65,6 @@ SetupVDP:
 		bne.s @waitfordma
 		move.l #$8F028164,(a6)
 
-; Clear CRAM
-		move.l	#$C0000000, (a6)
-		move.w	#63,d1
-@cram:
-		move.w	d2, (a5)
-		dbf	d1, @cram
-		
 ; Reset PSG
 
 		move.b	#$9F,($C00011).l
