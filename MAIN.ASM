@@ -111,13 +111,8 @@ Init:
 		bsr MemoryPoolAlloc
 		addq #ElemContents, a0
 		bsr Obj01Create
-@EnableInterrupts
-		move #$0000,sr ; Switch to user mode and unmask interrupts
-		
-;-----------------------
-; Loop principal
-;-----------------------
 @idle:
+		stop #$2000 ; stop and wait for interrupts
 		bra @idle
 
 ;---------------------
